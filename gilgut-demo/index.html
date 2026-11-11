@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>길굿 — 주행 장단 데모</title>
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+<div class="app">
+
+  <!-- ───────── 차량 디스플레이 (IVI) ───────── -->
+  <section class="ivi" id="ivi">
+    <header class="ivi-bar">
+      <span class="ivi-app">길굿</span>
+      <span class="ivi-mid" id="iviStatus">주차 중</span>
+      <span class="ivi-right"><span id="iviBadges"></span><span id="iviClock"></span></span>
+    </header>
+
+    <!-- 홈 (주차) -->
+    <div class="view" id="view-home">
+      <div class="home-left">
+        <div class="eyebrow">내 차가 치는 장단</div>
+        <h1 class="brand">길굿</h1>
+        <p class="tagline">지역마다 달라지는 길 위의 농악.<br>기어를 D로 옮기면 오늘의 한 판이 시작됩니다.</p>
+        <button class="power" id="btnPower"><span class="dot"></span><span id="powerLabel">길굿 켜짐</span></button>
+        <div class="voice-hint">음성으로도 됩니다 — “길굿 시작” · “길굿 멈춰”</div>
+      </div>
+      <div class="home-right">
+        <button class="card" id="cardMap">
+          <div class="card-h">가락 지도</div>
+          <div class="card-big"><span id="homeCollected">0</span><small> / 15 가락</small></div>
+          <div class="card-s">지나온 권역의 가락이 쌓입니다</div>
+        </button>
+        <div class="card static">
+          <div class="card-h">지난 한 판</div>
+          <div class="records" id="homeRecords"><span class="empty">아직 저장된 판이 없습니다</span></div>
+        </div>
+        <div class="card static">
+          <div class="card-h">설정</div>
+          <label class="vol">음량 <input type="range" id="vol" min="0" max="100" value="80"></label>
+          <div class="card-s">읽기 전용 차량 신호만 사용 · 기록은 차량 안에만 저장<br>음원: 데모는 합성음 (정식 버전은 국립국악원 국악기 디지털 음원, 공공누리 제1유형 예정)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 주행 중 -->
+    <div class="view hidden" id="view-drive">
+      <div class="drive-left">
+        <div class="eyebrow">지금 지나는 권역</div>
+        <div class="region" id="dRegion">호남우도</div>
+        <div class="region-sub" id="dRegionSub"></div>
+        <div class="jangdan"><span id="dJangdan">굿거리</span><em id="dCap" class="hidden">빠르기 상한</em></div>
+        <div class="ens" id="dEns">
+          <span data-i="janggu">장구</span><span data-i="buk">북</span><span data-i="kk">꽹과리</span><span data-i="jing">징</span>
+        </div>
+      </div>
+      <div class="drive-right"><canvas id="ring"></canvas></div>
+      <div class="drive-foot">주행 중에는 화면 조작이 제한됩니다 · 소리로만 즐기세요</div>
+    </div>
+
+    <!-- 한 판 기록 -->
+    <div class="view hidden paper" id="view-record">
+      <img id="recImg" alt="오늘의 장단 그림">
+      <div class="rec-info">
+        <div class="eyebrow">주행 한 판 기록</div>
+        <h2 id="recTitle">오늘의 판</h2>
+        <dl id="recStats"></dl>
+        <div class="rec-new" id="recNew"></div>
+        <div class="rec-actions">
+          <button id="recSave">그림 저장</button>
+          <button id="recMap">가락 지도</button>
+          <button id="recClose">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 가락 지도 -->
+    <div class="view hidden" id="view-map">
+      <svg id="mapSvg" viewBox="0 0 330 390" aria-label="권역 개념도"></svg>
+      <div class="map-info">
+        <div class="eyebrow">가락 지도 · 권역 개념도</div>
+        <h2><span id="mapCount">0</span> / 15 가락 수집</h2>
+        <ul id="mapList"></ul>
+        <button id="mapClose">돌아가기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────── 자막 ───────── -->
+  <div class="caption" id="caption"><b>길굿 데모</b><span>아래 차량 신호를 조작하거나 ‘자동 시연’을 누르세요. 소리가 납니다.</span></div>
+
+  <!-- ───────── 차량 신호 시뮬레이터 ───────── -->
+  <section class="panel" id="panel">
+    <div class="grp">
+      <h3>기어 <small>판의 시작과 끝</small></h3>
+      <div class="seg" id="gear"><button data-v="P" class="on">P</button><button data-v="D">D</button></div>
+      <div class="speedo"><b id="spd">0</b><small>km/h</small></div>
+    </div>
+    <div class="grp wide">
+      <h3>가속 <small>차속 → 빠르기</small></h3>
+      <input type="range" id="target" min="0" max="130" value="0">
+      <div class="ticks"><span>굿거리</span><span>자진모리</span><span>휘모리</span><span>상한</span></div>
+    </div>
+    <div class="grp">
+      <h3>브레이크 <small>Vehicle — Brake → 징</small></h3>
+      <div class="row"><button id="brake" class="hold">제동</button><button id="hard" class="warn">급제동</button></div>
+      <button id="stopHold">신호 대기 정차</button>
+    </div>
+    <div class="grp">
+      <h3>방향지시등 <small>TurnSignal → 꽹과리</small></h3>
+      <div class="row"><button id="turnL">◀ 좌</button><button id="turnR">우 ▶</button></div>
+    </div>
+    <div class="grp">
+      <h3>와이퍼 · 전조등 <small>Wiper · Light → 북 · 음색</small></h3>
+      <div class="seg" id="wiper"><button data-v="0" class="on">끔</button><button data-v="1">약</button><button data-v="2">강</button></div>
+      <button id="lights">전조등 (야간)</button>
+    </div>
+    <div class="grp">
+      <h3>주행 모드 <small>DrivingMode → 편성 밀도</small></h3>
+      <div class="seg" id="mode"><button data-v="eco">에코</button><button data-v="normal" class="on">노멀</button><button data-v="sport">스포츠</button></div>
+      <button id="cruise">크루즈</button>
+    </div>
+    <div class="grp wide">
+      <h3>위치 <small>Fused Location → 지역 가락</small></h3>
+      <div class="chips" id="regions"></div>
+    </div>
+    <div class="grp">
+      <h3>안내 · 음성 <small>NaviHelper · STT</small></h3>
+      <div class="row"><button id="nav">내비 안내</button><button id="call">전화</button></div>
+      <div class="row"><button id="vStart">🎙 시작</button><button id="vStop">🎙 멈춰</button></div>
+    </div>
+    <div class="grp demo">
+      <h3>시연</h3>
+      <button id="auto" class="primary">▶ 자동 시연 (약 2분)</button>
+      <div class="row"><button id="rec">● 화면 녹화</button><button id="hide">패널 숨김 (H)</button></div>
+    </div>
+  </section>
+</div>
+
+<script src="audio.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
