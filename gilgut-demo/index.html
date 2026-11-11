@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+// 안드로이드 앱(WebView)에서는 차량 화면 크기와 무관하게 1600px 폭 기준으로 맞춰 보여 줍니다.
+if (navigator.userAgent.includes('GilgutApp')) document.querySelector('meta[name=viewport]').content = 'width=1600';
+</script>
 <title>길굿 — 주행 장단 데모</title>
 <link rel="stylesheet" href="style.css?v=2">
 </head>

@@ -548,6 +548,7 @@
   $('#btnPower').onclick = () => act.power();
   $('#auto').onclick = () => (autoTimers.length ? stopAuto() : startAuto());
   $('#rec').onclick = toggleRec;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) $('#rec').classList.add('hidden'); // 앱(WebView)에서는 탭 녹화 불가
   const togglePanel = () => $('#panel').classList.toggle('hide');
   $('#hide').onclick = togglePanel;
   $('#vol').oninput = e => A.setVolume(e.target.value / 100);

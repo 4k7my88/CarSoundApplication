@@ -2,3 +2,9 @@
 .DS_Store
 .claude/
 *.docx
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.jks
+keystore.properties

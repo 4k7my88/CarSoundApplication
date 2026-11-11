@@ -12,8 +12,26 @@
 - 아래쪽: 차량 신호 시뮬레이터 — 각 신호가 대응하는 Pleos Connect SDK 도메인 표기
 - `H`: 시뮬레이터 패널 숨김 · ‘화면 녹화’: 탭 화면과 소리를 영상 파일로 저장
 
+## APK
+
+- 위치: `apk/김다하_길굿_release.apk` (서명된 release 빌드, 패키지 `kr.gilgut.demo`, 버전 0.1.0)
+- 요구 사항: Android 9 (API 28) 이상, 가로 화면. 권한을 요청하지 않으며 네트워크 없이 동작합니다.
+- 설치: `adb install apk/김다하_길굿_release.apk` 후 ‘길굿’ 실행
+- 내용: 위 웹 데모를 앱 안에 담아 전체 화면 WebView로 보여 주는 시연용 앱입니다. 화면은 폭 1600px 기준으로 맞춰집니다.
+- 테스트 환경: 빌드와 서명 검증까지만 확인했습니다. Pleos Connect 에뮬레이터(버전·화면 규격)에서의 실행은 아직 확인하지 못했습니다.
+
+### 직접 빌드
+
+JDK 17과 Android SDK(platform 34, build-tools 34.0.0)가 필요합니다.
+
+```bash
+cd android && ./gradlew assembleRelease
+```
+
+서명 정보는 저장소에 없습니다. `~/.gilgut/keystore.properties`(storeFile, storePassword, keyAlias, keyPassword)가 있으면 서명하고, 없으면 서명되지 않은 APK가 만들어집니다.
+
 ## 현재 상태
 
-- 웹 프로토타입이며 Pleos Connect 네이티브 앱(Kotlin)이 아닙니다. 차량 신호는 화면의 시뮬레이터로 대신합니다.
+- 웹 프로토타입과 이를 감싼 안드로이드 앱이며, 아직 Pleos Connect SDK를 쓰지 않습니다. 차량 신호는 화면의 시뮬레이터로 대신합니다.
 - 악기 소리는 Web Audio 합성음입니다. 정식 버전은 국립국악원 국악기 디지털 음원(공공누리 제1유형)을 사용할 예정입니다.
 - 장단과 권역별 가락은 시연용 근사치입니다.
